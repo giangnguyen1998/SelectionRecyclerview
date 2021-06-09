@@ -3,7 +3,6 @@ package edu.nuce.apps.newflowtypes
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.widget.SwitchCompat
 import androidx.core.view.WindowCompat
 import androidx.recyclerview.selection.SelectionPredicates
 import androidx.recyclerview.selection.SelectionTracker
@@ -31,12 +30,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
 
         checkedAdapter = CheckedAdapter()
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerview)
-        val switchCompat = findViewById<SwitchCompat>(R.id.swichCompat)
-
-        switchCompat.setOnCheckedChangeListener { _, isChecked ->
-            checkedAdapter.selectedMode = if (isChecked) Mode.MULTIPLE else Mode.SINGLE
-        }
-        checkedAdapter.selectedMode = Mode.MULTIPLE
 
         recyclerView.apply {
             setHasFixedSize(true)
@@ -53,7 +46,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
         )
 
         tracker = SelectionTracker.Builder(
-            "mySelection",
+            Checked::class.java.simpleName,
             recyclerView,
             CheckedKeyProvider(recyclerView),
             CheckedItemDetailsLookup(recyclerView),
@@ -86,17 +79,5 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                     super.onItemStateChanged(key, selected)
                 }
             })
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-        checkedAdapter.onRestoreInstanceState(savedInstanceState)
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-        if (::checkedAdapter.isInitialized) {
-            checkedAdapter.onSaveStateInstance(outState)
-        }
     }
 }

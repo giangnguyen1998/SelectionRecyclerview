@@ -1,6 +1,5 @@
 package edu.nuce.apps.newflowtypes
 
-import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -13,33 +12,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import edu.nuce.apps.newflowtypes.databinding.ItemCheckBinding
 import kotlinx.android.parcel.Parcelize
-import kotlin.properties.Delegates
 
 class CheckedAdapter : ListAdapter<Checked, CheckedVH>(DiffCallback) {
 
     var tracker: SelectionTracker<Long>? = null
 
-    var selectedItem: Int by Delegates.observable(RecyclerView.NO_POSITION) { _, old, new ->
-        notifyItemChanged(old)
-        notifyItemChanged(new)
-    }
-
     init {
         setHasStableIds(true)
-    }
-
-    var selectedMode: Mode by Delegates.vetoable(Mode.SINGLE) { _, old, new ->
-        selectedItem = 1
-        tracker?.clearSelection()
-        old != new
-    }
-
-    fun onSaveStateInstance(outState: Bundle) {
-        outState.putInt(SELECTED_ITEM, selectedItem)
-    }
-
-    fun onRestoreInstanceState(savedState: Bundle) {
-        selectedItem = savedState.getInt(SELECTED_ITEM)
     }
 
     override fun getItemId(position: Int): Long = position.toLong()
@@ -47,47 +26,29 @@ class CheckedAdapter : ListAdapter<Checked, CheckedVH>(DiffCallback) {
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CheckedVH {
         val layoutInflater = LayoutInflater.from(parent.context)
         val binding = ItemCheckBinding.inflate(layoutInflater, parent, false)
-        return CheckedVH(binding) { position ->
-            if (selectedMode == Mode.SINGLE) {
-                selectedItem = position
-            } else {
-                selectedItem = RecyclerView.NO_POSITION
-            }
-        }
+        return CheckedVH(binding)
     }
 
     override fun onBindViewHolder(holder: CheckedVH, position: Int) {
         getItem(position).let {
             holder.bind(
                 it,
-                if (selectedMode == Mode.SINGLE) position == selectedItem else tracker?.isSelected(
+                tracker?.isSelected(
                     position.toLong()
                 ) ?: false
             )
         }
     }
-
-    companion object {
-        const val SELECTED_ITEM: String = "SELECTED_ITEM"
-        const val SELECTED_ITEMS: String = "SELECTED_ITEMS"
-    }
-}
-
-enum class Mode {
-    SINGLE,
-    MULTIPLE
 }
 
 class CheckedVH(
-    private val binding: ItemCheckBinding,
-    private val onClick: (position: Int) -> Unit
+    private val binding: ItemCheckBinding
 ) : RecyclerView.ViewHolder(binding.root) {
 
     fun bind(item: Checked, checked: Boolean = false) {
         binding.run {
             text.text = item.data
             check.isSelected = checked
-            root.setOnClickListener { onClick.invoke(adapterPosition) }
         }
     }
 
