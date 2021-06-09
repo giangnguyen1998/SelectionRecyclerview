@@ -3,6 +3,7 @@ plugins {
     id 'kotlin-android'
     id 'kotlin-android-extensions'
     id 'kotlin-kapt'
+    id 'dagger.hilt.android.plugin'
 }
 
 android {
@@ -52,6 +53,9 @@ dependencies {
     implementation 'androidx.constraintlayout:constraintlayout:2.0.4'
     implementation "androidx.slidingpanelayout:slidingpanelayout:$slidingpane_version"
     implementation 'androidx.recyclerview:recyclerview-selection:1.1.0'
+
+    implementation 'com.google.dagger:hilt-android:2.36'
+    kapt 'com.google.dagger:hilt-compiler:2.36'
 
     // Retrofit
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"

@@ -1,5 +1,6 @@
 package edu.nuce.apps.newflowtypes
 
+import android.os.Bundle
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -16,10 +17,6 @@ import kotlin.properties.Delegates
 
 class CheckedAdapter : ListAdapter<Checked, CheckedVH>(DiffCallback) {
 
-    init {
-        setHasStableIds(true)
-    }
-
     var tracker: SelectionTracker<Long>? = null
 
     var selectedItem: Int by Delegates.observable(RecyclerView.NO_POSITION) { _, old, new ->
@@ -27,10 +24,22 @@ class CheckedAdapter : ListAdapter<Checked, CheckedVH>(DiffCallback) {
         notifyItemChanged(new)
     }
 
+    init {
+        setHasStableIds(true)
+    }
+
     var selectedMode: Mode by Delegates.vetoable(Mode.SINGLE) { _, old, new ->
-        selectedItem = RecyclerView.NO_POSITION
+        selectedItem = 1
         tracker?.clearSelection()
         old != new
+    }
+
+    fun onSaveStateInstance(outState: Bundle) {
+        outState.putInt(SELECTED_ITEM, selectedItem)
+    }
+
+    fun onRestoreInstanceState(savedState: Bundle) {
+        selectedItem = savedState.getInt(SELECTED_ITEM)
     }
 
     override fun getItemId(position: Int): Long = position.toLong()
@@ -56,6 +65,11 @@ class CheckedAdapter : ListAdapter<Checked, CheckedVH>(DiffCallback) {
                 ) ?: false
             )
         }
+    }
+
+    companion object {
+        const val SELECTED_ITEM: String = "SELECTED_ITEM"
+        const val SELECTED_ITEMS: String = "SELECTED_ITEMS"
     }
 }
 
@@ -110,8 +124,10 @@ class CheckedItemDetailsLookup(private val recyclerView: RecyclerView) : ItemDet
     }
 }
 
-class CheckedKeyProvider(private val recyclerView: RecyclerView) :
-    ItemKeyProvider<Long>(SCOPE_MAPPED) {
+class CheckedKeyProvider(private val recyclerView: RecyclerView) : ItemKeyProvider<Long>(
+    SCOPE_MAPPED
+) {
+
     override fun getKey(position: Int): Long? {
         return recyclerView.adapter?.getItemId(position)
     }
