@@ -55,7 +55,8 @@ class CheckedVH(
     fun getItemDetails(): ItemDetailsLookup.ItemDetails<Long> =
         object : ItemDetailsLookup.ItemDetails<Long>() {
             override fun getPosition(): Int = adapterPosition
-            override fun getSelectionKey(): Long? = itemId
+            override fun getSelectionKey(): Long = itemId
+            override fun inSelectionHotspot(e: MotionEvent): Boolean = true
         }
 }
 
@@ -83,6 +84,15 @@ class CheckedItemDetailsLookup(private val recyclerView: RecyclerView) : ItemDet
         }
         return null
     }
+}
+
+class CheckedSinglePredicate : SelectionTracker.SelectionPredicate<Long>() {
+
+    override fun canSetStateForKey(key: Long, nextState: Boolean): Boolean = !(key.toInt() == 0 && !nextState)
+
+    override fun canSetStateAtPosition(position: Int, nextState: Boolean): Boolean = true
+
+    override fun canSelectMultiple(): Boolean = true
 }
 
 class CheckedKeyProvider(private val recyclerView: RecyclerView) : ItemKeyProvider<Long>(

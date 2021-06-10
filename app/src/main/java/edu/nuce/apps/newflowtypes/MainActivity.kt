@@ -21,8 +21,6 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
     @Inject
     lateinit var apiService: ApiService
 
-    private var isSelectedDefault = false
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -52,7 +50,7 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
             CheckedItemDetailsLookup(recyclerView),
             StorageStrategy.createLongStorage()
         ).withSelectionPredicate(
-            SelectionPredicates.createSelectAnything()
+            SelectionPredicates.createSelectSingleAnything()
         ).build()
 
         checkedAdapter.tracker = tracker
@@ -67,16 +65,16 @@ class MainActivity : AppCompatActivity(R.layout.activity_main) {
                 }
 
                 override fun onItemStateChanged(key: Long, selected: Boolean) {
-                    if (key.toInt() == 0 && selected && !isSelectedDefault) {
-                        isSelectedDefault = true
-                        tracker.clearSelection()
+                    super.onItemStateChanged(key, selected)
+                    if (key.toInt() == 0 && selected || tracker.selection.isEmpty && key.toInt() != 0) {
+                        tracker.setItemsSelected(tracker.selection.filter { it.toInt() != 0 }, !selected)
+                    }
+                    if (tracker.selection.isEmpty) {
                         tracker.select(0)
                     }
-                    if (key.toInt() != 0) {
+                    if (key.toInt() != 0 && selected) {
                         tracker.deselect(0)
-                        isSelectedDefault = false
                     }
-                    super.onItemStateChanged(key, selected)
                 }
             })
     }
